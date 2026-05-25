@@ -1,11 +1,15 @@
 import type { APIRoute } from 'astro';
 import { getIdeas, createIdea } from '../../lib/db';
 
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ url, locals }) => {
   const { DB } = locals.runtime.env;
   
+  const status = url.searchParams.get('status') || undefined;
+  const classification = url.searchParams.get('classification') || undefined;
+  const search = url.searchParams.get('search') || undefined;
+
   try {
-    const ideas = await getIdeas(DB);
+    const ideas = await getIdeas(DB, { status, classification, search });
     return new Response(JSON.stringify({ ideas }), {
       headers: { 'Content-Type': 'application/json' }
     });
