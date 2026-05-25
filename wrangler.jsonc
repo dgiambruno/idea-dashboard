@@ -7,6 +7,13 @@
 		"directory": "./dist",
 		"binding": "ASSETS"
 	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "expensive-asshole-waitlist",
+			"database_id": "d551329b-a54b-4da1-bd62-1ae595e193bb"
+		}
+	],
 	"observability": {
 		"enabled": true
 	}
