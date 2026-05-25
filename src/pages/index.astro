@@ -41,6 +41,17 @@ import Layout from '../layouts/Layout.astro';
       </select>
     </div>
 
+    <!-- Bulk Actions Bar -->
+    <div id="bulk-bar" class="hidden mb-4 bg-zinc-900 text-white px-5 py-3 rounded-2xl flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <span id="selected-count" class="font-mono text-sm"></span>
+        <button id="bulk-status-btn" class="text-sm px-4 py-1 bg-white/10 hover:bg-white/20 rounded-xl">Change Status</button>
+        <button id="bulk-obsidian-btn" class="text-sm px-4 py-1 bg-white/10 hover:bg-white/20 rounded-xl">Export to Obsidian</button>
+        <button id="bulk-export-csv-btn" class="text-sm px-4 py-1 bg-white/10 hover:bg-white/20 rounded-xl">Export CSV</button>
+      </div>
+      <button id="bulk-clear" class="text-sm text-white/60 hover:text-white">Clear selection</button>
+    </div>
+
     <!-- Add Idea Form -->
     <div class="bg-white rounded-3xl shadow-sm border p-8 mb-12">
       <h2 class="text-2xl font-semibold mb-6">New Idea</h2>
@@ -120,13 +131,18 @@ import Layout from '../layouts/Layout.astro';
     <div>
       <div class="flex items-center justify-between mb-4 px-1">
         <h2 class="text-2xl font-semibold">All Ideas</h2>
-        <div id="results-count" class="text-sm text-gray-500 font-mono"></div>
+        <div class="flex items-center gap-4">
+          <div id="results-count" class="text-sm text-gray-500 font-mono"></div>
+          <button id="export-csv" class="text-sm px-4 py-1.5 border rounded-xl hover:bg-gray-50">Export CSV</button>
+        </div>
       </div>
       <div id="ideas-list" class="space-y-4"></div>
     </div>
   </main>
 
   <script>
+    let selectedIds = new Set();
+    let allIdeas = [];
     let debounceTimer;
 
     function debounce(fn, delay = 280) {
@@ -148,7 +164,38 @@ import Layout from '../layouts/Layout.astro';
 
       const res = await fetch(`/api/ideas?${params}`);
       const data = await res.json();
-      renderIdeas(data.ideas || []);
+      allIdeas = data.ideas || [];
+      renderIdeas(allIdeas);
+      updateBulkBar();
+    }
+
+    function toggleSelect(id, checked) {
+      if (checked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.delete(id);
+      }
+      updateBulkBar();
+    }
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulk-bar');
+      const countEl = document.getElementById('selected-count');
+      
+      if (selectedIds.size > 0) {
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        countEl.textContent = `${selectedIds.size} selected`;
+      } else {
+        bar.classList.add('hidden');
+        bar.classList.remove('flex');
+      }
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      updateBulkBar();
     }
 
     function renderIdeas(ideas) {
@@ -172,33 +219,36 @@ import Layout from '../layouts/Layout.astro';
           } catch {}
         }
 
+        const isSelected = selectedIds.has(idea.id);
+
         return `
-          <div class="bg-white border rounded-3xl p-7 hover:shadow-sm transition-all">
-            <div class="flex justify-between gap-4">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 flex-wrap">
-                  <h3 class="font-semibold text-[21px] tracking-[-0.2px]">${idea.title}</h3>
-                  ${idea.classification ? `<span class="text-xs px-3.5 py-px rounded-full bg-zinc-900 text-white">${idea.classification}</span>` : ''}
-                  <span class="text-xs px-3.5 py-px rounded-full ${getStatusColor(idea.status)}">${formatStatus(idea.status)}</span>
-                </div>
-
-                ${idea.content ? `<p class="mt-4 text-[15px] text-gray-600 leading-relaxed">${idea.content}</p>` : ''}
-
-                <div class="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
-                  ${idea.category ? `<div>Category: <span class="text-gray-700">${idea.category}</span></div>` : ''}
-                  ${idea.source ? `<div>Source: <span class="text-gray-700">${idea.source}</span></div>` : ''}
-                </div>
-
-                ${tagsHtml ? `<div class="mt-4 flex flex-wrap gap-2">${tagsHtml}</div>` : ''}
-
-                <div class="mt-5 flex gap-x-6 text-sm">
-                  ${idea.code_url ? `<a href="${idea.code_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Code →</a>` : ''}
-                  ${idea.source_url ? `<a href="${idea.source_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Source →</a>` : ''}
-                </div>
-              </div>
+          <div class="bg-white border rounded-3xl p-7 hover:shadow-sm transition-all flex gap-5">
+            <div class="pt-1">
+              <input type="checkbox" 
+                     class="w-4 h-4 accent-black" 
+                     ${isSelected ? 'checked' : ''}
+                     onchange="toggleSelect('${idea.id}', this.checked)" />
             </div>
-            <div class="mt-6 text-xs text-gray-400 font-mono">
-              ${new Date(idea.created_at).toLocaleDateString()} · ${idea.status}
+            <div class="flex-1">
+              <div class="flex items-center gap-3 flex-wrap">
+                <h3 class="font-semibold text-[21px] tracking-[-0.2px]">${idea.title}</h3>
+                ${idea.classification ? `<span class="text-xs px-3.5 py-px rounded-full bg-zinc-900 text-white">${idea.classification}</span>` : ''}
+                <span class="text-xs px-3.5 py-px rounded-full ${getStatusColor(idea.status)}">${formatStatus(idea.status)}</span>
+              </div>
+
+              ${idea.content ? `<p class="mt-4 text-[15px] text-gray-600 leading-relaxed">${idea.content}</p>` : ''}
+
+              <div class="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
+                ${idea.category ? `<div>Category: <span class="text-gray-700">${idea.category}</span></div>` : ''}
+                ${idea.source ? `<div>Source: <span class="text-gray-700">${idea.source}</span></div>` : ''}
+              </div>
+
+              ${tagsHtml ? `<div class="mt-4 flex flex-wrap gap-2">${tagsHtml}</div>` : ''}
+
+              <div class="mt-5 flex gap-x-6 text-sm">
+                ${idea.code_url ? `<a href="${idea.code_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Code →</a>` : ''}
+                ${idea.source_url ? `<a href="${idea.source_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Source →</a>` : ''}
+              </div>
             </div>
           </div>
         `;
@@ -231,7 +281,92 @@ import Layout from '../layouts/Layout.astro';
       return map[status] || status;
     }
 
-    // Form
+    // Bulk actions
+    document.getElementById('bulk-clear').addEventListener('click', clearSelection);
+
+    document.getElementById('bulk-status-btn').addEventListener('click', async () => {
+      const newStatus = prompt('Enter new status (new, raw, in-progress, review, complete, discarded, archived):');
+      if (!newStatus) return;
+
+      const res = await fetch('/api/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          ids: Array.from(selectedIds),
+          newStatus
+        })
+      });
+
+      if (res.ok) {
+        selectedIds.clear();
+        loadIdeas();
+      }
+    });
+
+    document.getElementById('bulk-obsidian-btn').addEventListener('click', async () => {
+      const res = await fetch('/api/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-obsidian',
+          ids: Array.from(selectedIds)
+        })
+      });
+
+      const data = await res.json();
+      if (data.files) {
+        // Download each file
+        data.files.forEach(file => {
+          const blob = new Blob([file.content], { type: 'text/markdown' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = file.filename;
+          a.click();
+        });
+        alert(`Downloaded ${data.files.length} markdown file(s) for Obsidian. Drop them into your vault.`);
+      }
+    });
+
+    document.getElementById('bulk-export-csv-btn').addEventListener('click', () => {
+      const selectedIdeas = allIdeas.filter(i => selectedIds.has(i.id));
+      exportToCSV(selectedIdeas);
+    });
+
+    // Single export
+    document.getElementById('export-csv').addEventListener('click', () => {
+      exportToCSV(allIdeas);
+    });
+
+    function exportToCSV(ideas) {
+      if (!ideas.length) return alert('No ideas to export');
+
+      const headers = ['title', 'classification', 'status', 'category', 'tags', 'content', 'code_url', 'source_url', 'created_at'];
+      const rows = ideas.map(idea => {
+        let tags = '';
+        try { tags = idea.tags ? JSON.parse(idea.tags).join('; ') : ''; } catch {}
+        return [
+          `"${idea.title}"`,
+          idea.classification || '',
+          idea.status,
+          idea.category || '',
+          tags,
+          `"${(idea.content || '').replace(/"/g, '""')}"`,
+          idea.code_url || '',
+          idea.source_url || '',
+          idea.created_at
+        ].join(',');
+      });
+
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ideas.csv';
+      a.click();
+    }
+
+    // Form submission
     document.getElementById('add-idea-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
@@ -278,6 +413,9 @@ import Layout from '../layouts/Layout.astro';
     searchInput.addEventListener('input', debouncedLoad);
     classificationFilter.addEventListener('change', loadIdeas);
     statusFilter.addEventListener('change', loadIdeas);
+
+    // Expose toggleSelect to inline handlers
+    window.toggleSelect = toggleSelect;
 
     loadIdeas();
   </script>
