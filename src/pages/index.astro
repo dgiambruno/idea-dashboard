@@ -1,11 +1,120 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Idea Bank">
+  <main class="max-w-4xl mx-auto p-8">
+    <h1 class="text-4xl font-bold mb-2">Idea Bank</h1>
+    <p class="text-gray-600 mb-8">Track and manage all your ideas in one place.</p>
+
+    <!-- Add Idea Form -->
+    <div class="bg-white rounded-xl shadow p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Add New Idea</h2>
+      <form id="add-idea-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Title</label>
+          <input type="text" name="title" required class="w-full border rounded-lg px-4 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Description</label>
+          <textarea name="content" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Category</label>
+            <input type="text" name="category" class="w-full border rounded-lg px-4 py-2" placeholder="branding, product, etc." />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Status</label>
+            <select name="status" class="w-full border rounded-lg px-4 py-2">
+              <option value="idea">Idea</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800">
+          Add Idea
+        </button>
+      </form>
+    </div>
+
+    <!-- Ideas List -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4">All Ideas</h2>
+      <div id="ideas-list" class="space-y-4">
+        <p class="text-gray-500">Loading ideas...</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadIdeas() {
+      const res = await fetch('/api/ideas');
+      const data = await res.json();
+      const container = document.getElementById('ideas-list');
+      
+      if (!data.ideas?.length) {
+        container.innerHTML = '<p class="text-gray-500">No ideas yet. Add one above!</p>';
+        return;
+      }
+
+      container.innerHTML = data.ideas.map(idea => `
+        <div class="bg-white border rounded-xl p-5">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-semibold text-lg">${idea.title}</h3>
+              ${idea.category ? `<span class="text-xs px-2 py-0.5 bg-gray-100 rounded">${idea.category}</span>` : ''}
+            </div>
+            <span class="text-xs px-3 py-1 rounded-full ${getStatusColor(idea.status)}">${idea.status}</span>
+          </div>
+          ${idea.content ? `<p class="mt-3 text-gray-600">${idea.content}</p>` : ''}
+          <div class="mt-4 text-xs text-gray-400">
+            ${new Date(idea.created_at).toLocaleDateString()}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getStatusColor(status) {
+      switch (status) {
+        case 'idea': return 'bg-blue-100 text-blue-700';
+        case 'in-progress': return 'bg-yellow-100 text-yellow-700';
+        case 'done': return 'bg-green-100 text-green-700';
+        case 'archived': return 'bg-gray-200 text-gray-600';
+        default: return 'bg-gray-100 text-gray-600';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('add-idea-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
+      
+      const payload = {
+        title: formData.get('title'),
+        content: formData.get('content'),
+        category: formData.get('category'),
+        status: formData.get('status'),
+      };
+
+      const res = await fetch('/api/ideas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        form.reset();
+        loadIdeas();
+      } else {
+        alert('Failed to add idea');
+      }
+    });
+
+    // Initial load
+    loadIdeas();
+  </script>
 </Layout>
