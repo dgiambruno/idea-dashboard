@@ -5,9 +5,9 @@ export interface Idea {
   title: string;
   content: string | null;
   category: string | null;
-  classification: string | null; // Business, AI, Personal, Product, Design, Research, etc.
-  tags: string | null; // JSON string
-  status: string;
+  classification: string | null;
+  tags: string | null; // JSON array string: '["tag1","tag2"]'
+  status: string; // new | raw | in-progress | review | complete | discarded | archived
   source: string | null;
   code_url: string | null;
   source_url: string | null;
@@ -15,12 +15,23 @@ export interface Idea {
   updated_at: string;
 }
 
+export const IDEA_STATUSES = [
+  'new',
+  'raw',
+  'in-progress',
+  'review',
+  'complete',
+  'discarded',
+  'archived'
+] as const;
+
 export async function getIdeas(
   db: D1Database, 
   options: { 
     status?: string; 
     classification?: string; 
     search?: string;
+    tags?: string[];
   } = {}
 ) {
   let query = 'SELECT * FROM ideas WHERE 1=1';
@@ -42,6 +53,13 @@ export async function getIdeas(
     params.push(term, term, term);
   }
 
+  if (options.tags && options.tags.length > 0) {
+    // Simple tag filtering (checks if any tag matches)
+    const tagConditions = options.tags.map(() => 'tags LIKE ?').join(' OR ');
+    query += ` AND (${tagConditions})`;
+    options.tags.forEach(tag => params.push(`%"${tag}"%`));
+  }
+
   query += ' ORDER BY created_at DESC';
 
   const result = await db.prepare(query).bind(...params).all();
@@ -51,6 +69,9 @@ export async function getIdeas(
 export async function createIdea(db: D1Database, idea: Partial<Idea>) {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
+
+  const tagsJson = idea.tags ? 
+    (typeof idea.tags === 'string' ? idea.tags : JSON.stringify(idea.tags)) : null;
 
   await db.prepare(`
     INSERT INTO ideas (
@@ -63,8 +84,8 @@ export async function createIdea(db: D1Database, idea: Partial<Idea>) {
     idea.content || null,
     idea.category || null,
     idea.classification || null,
-    idea.tags || null,
-    idea.status || 'idea',
+    tagsJson,
+    idea.status || 'new',
     idea.source || 'dashboard',
     idea.code_url || null,
     idea.source_url || null,

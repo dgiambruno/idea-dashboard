@@ -3,27 +3,20 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Idea Bank">
-  <main class="max-w-5xl mx-auto p-8">
+  <main class="max-w-6xl mx-auto p-8">
     <div class="flex justify-between items-end mb-8">
       <div>
-        <h1 class="text-4xl font-bold">Idea Bank</h1>
-        <p class="text-gray-600 mt-1">Track, classify, and connect your ideas.</p>
+        <h1 class="text-4xl font-bold tracking-tight">Idea Bank</h1>
+        <p class="text-gray-600 mt-1">Classify, link, and evolve your ideas.</p>
       </div>
-      <div class="text-sm text-gray-500">
-        Powered by Cloudflare D1
-      </div>
+      <div class="text-sm text-gray-500 font-mono">D1 + Astro</div>
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-wrap gap-3 mb-6">
-      <input 
-        type="text" 
-        id="search" 
-        placeholder="Search ideas..." 
-        class="flex-1 min-w-[200px] border rounded-lg px-4 py-2 text-sm"
-      />
+    <div class="flex flex-wrap gap-3 mb-8">
+      <input type="text" id="search" placeholder="Search ideas..." class="flex-1 min-w-[220px] border rounded-xl px-4 py-2.5 text-sm" />
       
-      <select id="classification-filter" class="border rounded-lg px-4 py-2 text-sm">
+      <select id="classification-filter" class="border rounded-xl px-4 py-2.5 text-sm min-w-[160px]">
         <option value="">All Classifications</option>
         <option value="Business">Business</option>
         <option value="AI">AI</option>
@@ -36,27 +29,30 @@ import Layout from '../layouts/Layout.astro';
         <option value="Other">Other</option>
       </select>
 
-      <select id="status-filter" class="border rounded-lg px-4 py-2 text-sm">
+      <select id="status-filter" class="border rounded-xl px-4 py-2.5 text-sm min-w-[150px]">
         <option value="">All Statuses</option>
-        <option value="idea">Idea</option>
+        <option value="new">New</option>
+        <option value="raw">Raw</option>
         <option value="in-progress">In Progress</option>
-        <option value="done">Done</option>
+        <option value="review">Review</option>
+        <option value="complete">Complete</option>
+        <option value="discarded">Discarded</option>
         <option value="archived">Archived</option>
       </select>
     </div>
 
     <!-- Add Idea Form -->
-    <div class="bg-white rounded-2xl shadow-sm border p-6 mb-10">
-      <h2 class="text-xl font-semibold mb-4">Add New Idea</h2>
-      <form id="add-idea-form" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-3xl shadow-sm border p-8 mb-12">
+      <h2 class="text-2xl font-semibold mb-6">New Idea</h2>
+      <form id="add-idea-form" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label class="block text-sm font-medium mb-1">Title *</label>
-            <input type="text" name="title" required class="w-full border rounded-lg px-4 py-2" />
+            <label class="block text-sm font-medium mb-1.5">Title *</label>
+            <input type="text" name="title" required class="w-full border rounded-2xl px-5 py-3 text-lg" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Classification</label>
-            <select name="classification" class="w-full border rounded-lg px-4 py-2">
+            <label class="block text-sm font-medium mb-1.5">Classification</label>
+            <select name="classification" class="w-full border rounded-2xl px-5 py-3">
               <option value="">Select classification</option>
               <option value="Business">Business</option>
               <option value="AI">AI</option>
@@ -72,42 +68,49 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">Description</label>
-          <textarea name="content" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+          <label class="block text-sm font-medium mb-1.5">Description</label>
+          <textarea name="content" rows="4" class="w-full border rounded-2xl px-5 py-4"></textarea>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
           <div>
-            <label class="block text-sm font-medium mb-1">Category</label>
-            <input type="text" name="category" class="w-full border rounded-lg px-4 py-2" placeholder="branding, infrastructure..." />
+            <label class="block text-sm font-medium mb-1.5">Category</label>
+            <input type="text" name="category" class="w-full border rounded-2xl px-5 py-3" placeholder="branding, infra..." />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Status</label>
-            <select name="status" class="w-full border rounded-lg px-4 py-2">
-              <option value="idea">Idea</option>
+            <label class="block text-sm font-medium mb-1.5">Status</label>
+            <select name="status" class="w-full border rounded-2xl px-5 py-3">
+              <option value="new">New</option>
+              <option value="raw">Raw</option>
               <option value="in-progress">In Progress</option>
-              <option value="done">Done</option>
+              <option value="review">Review</option>
+              <option value="complete">Complete</option>
+              <option value="discarded">Discarded</option>
               <option value="archived">Archived</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Source</label>
-            <input type="text" name="source" class="w-full border rounded-lg px-4 py-2" placeholder="Obsidian, meeting, etc." />
+            <label class="block text-sm font-medium mb-1.5">Tags (comma separated)</label>
+            <input type="text" name="tags" class="w-full border rounded-2xl px-5 py-3" placeholder="urgent, q2, client" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Source</label>
+            <input type="text" name="source" class="w-full border rounded-2xl px-5 py-3" placeholder="Obsidian, meeting..." />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label class="block text-sm font-medium mb-1">Code URL</label>
-            <input type="url" name="code_url" class="w-full border rounded-lg px-4 py-2" placeholder="https://github.com/..." />
+            <label class="block text-sm font-medium mb-1.5">Code Repository / Link</label>
+            <input type="url" name="code_url" class="w-full border rounded-2xl px-5 py-3" placeholder="https://github.com/..." />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Source / Data / Files URL</label>
-            <input type="url" name="source_url" class="w-full border rounded-lg px-4 py-2" placeholder="https://..." />
+            <label class="block text-sm font-medium mb-1.5">Source Material / Data / Files</label>
+            <input type="url" name="source_url" class="w-full border rounded-2xl px-5 py-3" placeholder="https://..." />
           </div>
         </div>
 
-        <button type="submit" class="mt-2 bg-black text-white px-8 py-2.5 rounded-xl hover:bg-gray-900 transition">
+        <button type="submit" class="mt-4 bg-black hover:bg-zinc-900 transition text-white px-10 py-3.5 rounded-2xl font-medium">
           Save Idea
         </button>
       </form>
@@ -115,9 +118,9 @@ import Layout from '../layouts/Layout.astro';
 
     <!-- Ideas List -->
     <div>
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold">Ideas</h2>
-        <div id="results-count" class="text-sm text-gray-500"></div>
+      <div class="flex items-center justify-between mb-4 px-1">
+        <h2 class="text-2xl font-semibold">All Ideas</h2>
+        <div id="results-count" class="text-sm text-gray-500 font-mono"></div>
       </div>
       <div id="ideas-list" class="space-y-4"></div>
     </div>
@@ -126,7 +129,7 @@ import Layout from '../layouts/Layout.astro';
   <script>
     let debounceTimer;
 
-    function debounce(fn, delay = 300) {
+    function debounce(fn, delay = 280) {
       return (...args) => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => fn(...args), delay);
@@ -151,63 +154,107 @@ import Layout from '../layouts/Layout.astro';
     function renderIdeas(ideas) {
       const container = document.getElementById('ideas-list');
       const countEl = document.getElementById('results-count');
-      
       countEl.textContent = `${ideas.length} idea${ideas.length !== 1 ? 's' : ''}`;
 
       if (!ideas.length) {
-        container.innerHTML = `<p class="text-gray-500 py-8">No ideas found.</p>`;
+        container.innerHTML = `<p class="text-gray-500 py-12 text-center">No ideas match your filters.</p>`;
         return;
       }
 
-      container.innerHTML = ideas.map(idea => `
-        <div class="bg-white border rounded-2xl p-6 hover:shadow-sm transition">
-          <div class="flex justify-between items-start gap-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 flex-wrap">
-                <h3 class="font-semibold text-lg">${idea.title}</h3>
-                ${idea.classification ? 
-                  `<span class="text-xs px-3 py-0.5 rounded-full bg-zinc-100 text-zinc-700">${idea.classification}</span>` : ''}
-                <span class="text-xs px-3 py-0.5 rounded-full ${getStatusColor(idea.status)}">${idea.status}</span>
-              </div>
-              
-              ${idea.content ? `<p class="mt-3 text-gray-600">${idea.content}</p>` : ''}
-              
-              <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                ${idea.category ? `<span class="text-gray-500">Category: <span class="text-gray-700">${idea.category}</span></span>` : ''}
-                ${idea.source ? `<span class="text-gray-500">Source: <span class="text-gray-700">${idea.source}</span></span>` : ''}
-              </div>
+      container.innerHTML = ideas.map(idea => {
+        let tagsHtml = '';
+        if (idea.tags) {
+          try {
+            const tags = JSON.parse(idea.tags);
+            if (Array.isArray(tags) && tags.length) {
+              tagsHtml = tags.map(t => `<span class="px-3 py-0.5 text-xs bg-zinc-100 rounded-full">${t}</span>`).join('');
+            }
+          } catch {}
+        }
 
-              <div class="mt-4 flex gap-4 text-sm">
-                ${idea.code_url ? `<a href="${idea.code_url}" target="_blank" class="text-blue-600 hover:underline">View Code →</a>` : ''}
-                ${idea.source_url ? `<a href="${idea.source_url}" target="_blank" class="text-blue-600 hover:underline">Source Material →</a>` : ''}
+        return `
+          <div class="bg-white border rounded-3xl p-7 hover:shadow-sm transition-all">
+            <div class="flex justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h3 class="font-semibold text-[21px] tracking-[-0.2px]">${idea.title}</h3>
+                  ${idea.classification ? `<span class="text-xs px-3.5 py-px rounded-full bg-zinc-900 text-white">${idea.classification}</span>` : ''}
+                  <span class="text-xs px-3.5 py-px rounded-full ${getStatusColor(idea.status)}">${formatStatus(idea.status)}</span>
+                </div>
+
+                ${idea.content ? `<p class="mt-4 text-[15px] text-gray-600 leading-relaxed">${idea.content}</p>` : ''}
+
+                <div class="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
+                  ${idea.category ? `<div>Category: <span class="text-gray-700">${idea.category}</span></div>` : ''}
+                  ${idea.source ? `<div>Source: <span class="text-gray-700">${idea.source}</span></div>` : ''}
+                </div>
+
+                ${tagsHtml ? `<div class="mt-4 flex flex-wrap gap-2">${tagsHtml}</div>` : ''}
+
+                <div class="mt-5 flex gap-x-6 text-sm">
+                  ${idea.code_url ? `<a href="${idea.code_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Code →</a>` : ''}
+                  ${idea.source_url ? `<a href="${idea.source_url}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">Source →</a>` : ''}
+                </div>
               </div>
             </div>
+            <div class="mt-6 text-xs text-gray-400 font-mono">
+              ${new Date(idea.created_at).toLocaleDateString()} · ${idea.status}
+            </div>
           </div>
-          <div class="mt-4 text-xs text-gray-400">
-            Added ${new Date(idea.created_at).toLocaleDateString()}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function getStatusColor(status) {
-      switch (status) {
-        case 'idea': return 'bg-blue-100 text-blue-700';
-        case 'in-progress': return 'bg-amber-100 text-amber-700';
-        case 'done': return 'bg-emerald-100 text-emerald-700';
-        case 'archived': return 'bg-zinc-200 text-zinc-600';
-        default: return 'bg-gray-100 text-gray-600';
-      }
+      const colors = {
+        'new': 'bg-emerald-100 text-emerald-700',
+        'raw': 'bg-amber-100 text-amber-700',
+        'in-progress': 'bg-blue-100 text-blue-700',
+        'review': 'bg-purple-100 text-purple-700',
+        'complete': 'bg-green-100 text-green-700',
+        'discarded': 'bg-red-100 text-red-700',
+        'archived': 'bg-zinc-200 text-zinc-600'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-600';
     }
 
-    // Form submission
+    function formatStatus(status) {
+      const map = {
+        'new': 'New',
+        'raw': 'Raw',
+        'in-progress': 'In Progress',
+        'review': 'Review',
+        'complete': 'Complete',
+        'discarded': 'Discarded',
+        'archived': 'Archived'
+      };
+      return map[status] || status;
+    }
+
+    // Form
     document.getElementById('add-idea-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
       
-      const payload = Object.fromEntries(formData.entries());
-      
+      const tagsRaw = formData.get('tags');
+      let tags = null;
+      if (tagsRaw) {
+        tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+      }
+
+      const payload = {
+        title: formData.get('title'),
+        content: formData.get('content'),
+        category: formData.get('category'),
+        classification: formData.get('classification'),
+        status: formData.get('status'),
+        source: formData.get('source'),
+        code_url: formData.get('code_url'),
+        source_url: formData.get('source_url'),
+        tags: tags ? JSON.stringify(tags) : null
+      };
+
       const res = await fetch('/api/ideas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -227,12 +274,11 @@ import Layout from '../layouts/Layout.astro';
     const classificationFilter = document.getElementById('classification-filter');
     const statusFilter = document.getElementById('status-filter');
 
-    const debouncedLoad = debounce(loadIdeas, 300);
+    const debouncedLoad = debounce(loadIdeas, 280);
     searchInput.addEventListener('input', debouncedLoad);
     classificationFilter.addEventListener('change', loadIdeas);
     statusFilter.addEventListener('change', loadIdeas);
 
-    // Initial load
     loadIdeas();
   </script>
 </Layout>
